@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Collections.Generic;
 using DDR;
@@ -194,7 +194,20 @@ namespace PremierLeague3
 
                 int diff = current.goalsHome - current.goalsAway;
                 string predicted_result = "game skipped";
-                if (NH * Bet2Money(current.Bet1) > NA * Bet2Money(current.Bet2) + ND * Bet2Money(current.BetX)) 
+
+                double PH = (double)NH / (double)(sample.Length - 2);
+                double PD = (double)ND / (double)(sample.Length - 2);
+                double PA = (double)NA / (double)(sample.Length - 2);
+
+                //Console.WriteLine("{0:0.00}, {1:0.00}, {2:0.00}", PH, PD, PA);
+
+                double MH = PH * Bet2Money(current.Bet1) - (1.0 - PH) * 100.0;
+                double MD = PD * Bet2Money(current.BetX) - (1.0 - PD) * 100.0;
+                double MA = PA * Bet2Money(current.Bet2) - (1.0 - PA) * 100.0;
+
+                //Console.WriteLine("{0:0.00}, {1:0.00}, {2:0.00}", MH, MD, MA);
+
+                if (MH > MA && MH > MD)
                 {
                     if (diff > 0)
                     {
@@ -209,7 +222,7 @@ namespace PremierLeague3
                     }
                     ++Total;
                 }
-                if (NA * Bet2Money(current.Bet2) > NH * Bet2Money(current.Bet1) + ND * Bet2Money(current.BetX))
+                if (MA > MH && MA > MD)
                 {
                     if (diff < 0)
                     {
