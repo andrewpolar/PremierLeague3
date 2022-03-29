@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -66,7 +66,7 @@ namespace DDR
         public double[] GetOutput(double[] x)
         {
             double[] y = new double[km.Length];
-            for (int i = 1; i < km.Length - 1; ++i)
+            for (int i = 0; i < km.Length; ++i)
             {
                 y[i] = km[i].ComputeOutput(x);
             }
