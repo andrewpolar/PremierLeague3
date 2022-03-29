@@ -79,6 +79,7 @@ namespace PremierLeague3
             //Resort data
             Resorter resorter = new Resorter();
             resorter.ReadData(@"..\..\..\data\Training-Data.csv");
+            //comment out block below down to LABEL to compare with bagging
             resorter.Resort(1);
             resorter.Resort(2);
             resorter.Resort(3);
@@ -87,6 +88,7 @@ namespace PremierLeague3
             resorter.Resort(11);
             resorter.Resort(13);
             resorter.Resort(17);
+            //LABEL
 
             //Build ensemble by boosting
             Ensemble ensemble = new Ensemble(Resorter._inputs, Resorter._target);
@@ -179,33 +181,30 @@ namespace PremierLeague3
                 }
 
                 //here we apply model
-                double Lower = -0.5;
-                double Upper = 0.5;
                 double[] sample = ensemble.GetOutput(new double[] { indexHome, indexAway });
-                int NH = 0;
-                int ND = 0;
-                int NA = 0;
-                for (int i = 1; i < sample.Length - 1; ++i)  //skip first and last
+                double NH = 0.0;
+                double ND = 0.0;
+                double NA = 0.0;
+                for (int i = 0; i < sample.Length; ++i)  
                 {
-                    if (sample[i] < Lower) ++NA;
-                    if (sample[i] > Upper) ++NH;
-                    if (sample[i] >= Lower && sample[i] <= Upper) ++ND;
+                    if (Math.Round(sample[i]) < 0.1 && Math.Round(sample[i]) > -0.1) ND += 1.0;
+                    if (Math.Round(sample[i]) > 0.1) NH += 1.0;
+                    if (Math.Round(sample[i]) < -0.1) NA += 1.0;
                 }
+                //Console.WriteLine("{0:0.0} {1:0.0} {2:0.0}", NH, ND, NA);
 
                 int diff = current.goalsHome - current.goalsAway;
                 string predicted_result = "game skipped";
 
-                double PH = (double)NH / (double)(sample.Length - 2);
-                double PD = (double)ND / (double)(sample.Length - 2);
-                double PA = (double)NA / (double)(sample.Length - 2);
-
-                //Console.WriteLine("{0:0.00}, {1:0.00}, {2:0.00}", PH, PD, PA);
+                double PH = NH / (double)(sample.Length);
+                double PD = ND / (double)(sample.Length);
+                double PA = NA / (double)(sample.Length);
 
                 double MH = PH * Bet2Money(current.Bet1) - (1.0 - PH) * 100.0;
                 double MD = PD * Bet2Money(current.BetX) - (1.0 - PD) * 100.0;
                 double MA = PA * Bet2Money(current.Bet2) - (1.0 - PA) * 100.0;
 
-                //Console.WriteLine("{0:0.00}, {1:0.00}, {2:0.00}", MH, MD, MA);
+                //Console.WriteLine("{0:0.0} {1:0.0} {2:0.0}", MH, MD, MA);
 
                 if (MH > MA && MH > MD)
                 {
@@ -237,7 +236,7 @@ namespace PremierLeague3
                     }
                     ++Total;
                 }
-                if (false) //games with possible DRAW outcome are skipped
+                if (MD > MH && MD > MA) 
                 {
                     if (0 == diff)
                     {
